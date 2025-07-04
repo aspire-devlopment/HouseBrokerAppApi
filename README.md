@@ -7,7 +7,7 @@ A clean-architecture-based .NET API  for Broker Application with user roles (Bro
 ## 🧱 Tech Stack
 
 - **Backend:** ASP.NET Core Web API  
-- **Frontend:** Blazor Server  
+- **Frontend:** Blazor Server  The frontend (Blazor UI) part is not implemented yet but can be extended easily based on the existing API and architecture.
 - **Authentication:** ASP.NET Core Identity + JWT  
 - **Database:** SQL Server + Entity Framework Core  
 - **Architecture:** Clean Architecture (Domain, Application, Infrastructure, API)  
