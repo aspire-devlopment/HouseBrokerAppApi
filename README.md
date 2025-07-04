@@ -1,6 +1,6 @@
 # 🏠 HouseBrokerApp
 
-A clean-architecture-based .NET Full-Stack Broker Application with user roles (Broker, Seeker), property listing management, image uploads, and authentication/authorization using Identity and JWT.
+A clean-architecture-based .NET API  for Broker Application with user roles (Broker, Seeker), property listing management, image uploads, and authentication/authorization using Identity and JWT.
 
 ---
 
@@ -27,7 +27,7 @@ HouseBrokerApp/
 │   ├── HouseBrokerApp.Application/       # Interfaces, Services, Validators
 │   ├── HouseBrokerApp.Infrastructure/    # EF Core, DbContext, JWT, Repositories
 │   ├── HouseBrokerApp.API/               # Controllers, Middleware, DI, Program.cs
-│   └── HouseBrokerApp.UI/                # Blazor Server UI (Broker/Seeker Dashboards)
+│   └── HouseBrokerApp.UI/                # Blazor Server UI (Need To Implement)
 │
 └── README.md
 ```
@@ -42,8 +42,7 @@ HouseBrokerApp/
 - ✅ Property Listing CRUD
 - ✅ Upload & Display Multiple Property Images
 - ✅ Commission Calculation Logic (Based on Price Slabs)
-- ✅ Broker-only Dashboard for Listing Management
-- ✅ Search Properties by Location, Price, and Type
+- ✅ Search Properties by Location, Price
 - ✅ FluentValidation for Model Validation
 - ✅ Centralized Error Handling Middleware
 
@@ -90,7 +89,11 @@ You can test endpoints and provide JWT tokens for authorization.
 ```bash
 dotnet test
 ```
-
+##Future Implementations
+- UI Intigration with Blazor and Dashboard  Management
+- Forgot Password and Email Verifications.
+- Admin User Management For the verifications and Registration Of Brokers.
+- Interactive User Interface for the Seekers.
 
 ## 🙌 Author
 
