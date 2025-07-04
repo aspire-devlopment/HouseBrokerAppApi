@@ -137,23 +137,30 @@ ALTER TABLE [PropertyListings] ADD CONSTRAINT [FK_PropertyListings_AspNetUsers_A
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
 VALUES (N'20250703133204_AddIdentityTables', N'9.0.6');
 
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250703205921_ProductImageTable', N'9.0.6');
+
+ALTER TABLE [PropertyListings] DROP CONSTRAINT [FK_PropertyListings_AspNetUsers_ApplicationUserId];
+
+DROP INDEX [IX_PropertyListings_ApplicationUserId] ON [PropertyListings];
+
 DECLARE @var sysname;
 SELECT @var = [d].[name]
 FROM [sys].[default_constraints] [d]
 INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-WHERE ([d].[parent_object_id] = OBJECT_ID(N'[PropertyListings]') AND [c].[name] = N'ImageUrl');
+WHERE ([d].[parent_object_id] = OBJECT_ID(N'[PropertyListings]') AND [c].[name] = N'ApplicationUserId');
 IF @var IS NOT NULL EXEC(N'ALTER TABLE [PropertyListings] DROP CONSTRAINT [' + @var + '];');
-ALTER TABLE [PropertyListings] DROP COLUMN [ImageUrl];
+ALTER TABLE [PropertyListings] DROP COLUMN [ApplicationUserId];
 
-CREATE TABLE [PropertyImages] (
-    [Id] int NOT NULL IDENTITY,
-    [PropertyListingId] int NOT NULL,
-    [ImageUrl] nvarchar(max) NOT NULL,
-    [CreatedAt] datetime2 NOT NULL,
-    [UpdatedAt] datetime2 NULL,
-    CONSTRAINT [PK_PropertyImages] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_PropertyImages_PropertyListings_PropertyListingId] FOREIGN KEY ([PropertyListingId]) REFERENCES [PropertyListings] ([Id]) ON DELETE CASCADE
-);
+ALTER TABLE [AspNetUsers] ADD [BrokerId] int NOT NULL IDENTITY;
+
+ALTER TABLE [AspNetUsers] ADD CONSTRAINT [AK_AspNetUsers_BrokerId] UNIQUE ([BrokerId]);
+
+CREATE INDEX [IX_PropertyListings_BrokerId] ON [PropertyListings] ([BrokerId]);
+
+CREATE UNIQUE INDEX [IX_AspNetUsers_BrokerId] ON [AspNetUsers] ([BrokerId]);
+
+ALTER TABLE [PropertyListings] ADD CONSTRAINT [FK_PropertyListings_AspNetUsers_BrokerId] FOREIGN KEY ([BrokerId]) REFERENCES [AspNetUsers] ([BrokerId]) ON DELETE CASCADE;
 
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAt', N'MaxPrice', N'MinPrice', N'Rate', N'UpdatedAt') AND [object_id] = OBJECT_ID(N'[CommissionRates]'))
     SET IDENTITY_INSERT [CommissionRates] ON;
@@ -164,10 +171,8 @@ VALUES (1, '2025-07-03T20:19:43.5423002Z', 5000000.0, 0.0, 2.0, NULL),
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAt', N'MaxPrice', N'MinPrice', N'Rate', N'UpdatedAt') AND [object_id] = OBJECT_ID(N'[CommissionRates]'))
     SET IDENTITY_INSERT [CommissionRates] OFF;
 
-CREATE INDEX [IX_PropertyImages_PropertyListingId] ON [PropertyImages] ([PropertyListingId]);
-
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20250703201948_ImageTble', N'9.0.6');
+VALUES (N'20250704011254_AddedBrokerId', N'9.0.6');
 
 COMMIT;
 GO
