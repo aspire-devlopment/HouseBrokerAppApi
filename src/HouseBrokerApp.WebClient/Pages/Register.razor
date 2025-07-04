@@ -1,0 +1,44 @@
+﻿@page "/register"
+@using HouseBrokerApp.WebClient.Models
+@using HouseBrokerApp.WebClient.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<h3>Register</h3>
+
+<EditForm Model="@registerModel" OnValidSubmit="@HandleRegister">
+    <InputText @bind-Value="registerModel.Email" placeholder="Email" />
+    <InputText @bind-Value="registerModel.Password" type="password" placeholder="Password" />
+    <InputText @bind-Value="registerModel.FirstName" placeholder="First Name" />
+    <InputText @bind-Value="registerModel.LastName" placeholder="Last Name" />
+    <InputText @bind-Value="registerModel.PhoneNumber" placeholder="Phone Number" />
+    <InputText @bind-Value="registerModel.Address" placeholder="Address" />
+    <InputText @bind-Value="registerModel.UserType" placeholder="User Type (e.g. Broker)" />
+    <button type="submit">Register</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private RegisterModel registerModel = new();
+    private string? message;
+
+    private async Task HandleRegister()
+    {
+        var result = await AuthService.RegisterAsync(registerModel);
+
+        if (result == null)
+        {
+            message = "Registration failed.";
+            return;
+        }
+
+        message = "Registration successful. Please log in.";
+        Navigation.NavigateTo("/login");
+    }
+
+
+}

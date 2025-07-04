@@ -1,0 +1,50 @@
+﻿@page "/login"
+@using HouseBrokerApp.WebClient.Authentication
+@using HouseBrokerApp.WebClient.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Login</h3>
+
+<EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+    <InputText @bind-Value="loginModel.Email" placeholder="Email" />
+    <InputText @bind-Value="loginModel.Password" type="password" placeholder="Password" />
+    <button type="submit">Login</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p style="color:red">@errorMessage</p>
+}
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        var token = await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
+
+        if (token == null)
+        {
+            errorMessage = "Invalid login attempt.";
+            return;
+        }
+
+        // Notify authentication state changed so UI updates accordingly
+        if (AuthStateProvider is CustomAuthStateProvider customAuthProvider)
+        {
+            customAuthProvider.NotifyAuthenticationStateChanged();
+        }
+
+        Navigation.NavigateTo("/");
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
