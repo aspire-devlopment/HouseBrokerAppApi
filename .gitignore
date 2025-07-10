@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/HouseBrokerApp.API/wwwroot/Images/42e7726a-3805-43e6-b3db-4b5c189f23b4.webp

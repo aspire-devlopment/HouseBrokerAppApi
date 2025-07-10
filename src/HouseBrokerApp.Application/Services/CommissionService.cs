@@ -32,7 +32,7 @@ public class CommissionService : ICommissionService
         if (applicableRate == null)
             throw new Exception("Commission rate not configured.");
 
-        return price * (applicableRate.Rate / 100m);
+        return (decimal)(price * (applicableRate.Rate / 100m));
         
     }
 }

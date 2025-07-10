@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HouseBrokerApp.Infrastructure.Migrations
 {
     [DbContext(typeof(HouseBrokerAppDbContext))]
-    [Migration("20250703133204_AddIdentityTables")]
-    partial class AddIdentityTables
+    [Migration("20250710153810_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,12 @@ namespace HouseBrokerApp.Infrastructure.Migrations
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BrokerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BrokerId"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -95,6 +101,9 @@ namespace HouseBrokerApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BrokerId")
+                        .IsUnique();
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -134,7 +143,7 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                     b.ToTable("CommissionRates");
                 });
 
-            modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyListing", b =>
+            modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyImage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -142,8 +151,33 @@ namespace HouseBrokerApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PropertyListingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyListingId");
+
+                    b.ToTable("PropertyImages");
+                });
+
+            modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyListing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BrokerId")
                         .HasColumnType("int");
@@ -158,9 +192,6 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Features")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
@@ -182,7 +213,7 @@ namespace HouseBrokerApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("BrokerId");
 
                     b.ToTable("PropertyListings");
                 });
@@ -320,11 +351,25 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyImage", b =>
+                {
+                    b.HasOne("HouseBrokerApp.Domain.Entities.PropertyListing", "PropertyListing")
+                        .WithMany("Images")
+                        .HasForeignKey("PropertyListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PropertyListing");
+                });
+
             modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyListing", b =>
                 {
                     b.HasOne("HouseBrokerApp.Domain.Entities.ApplicationUser", null)
                         .WithMany("Listings")
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("BrokerId")
+                        .HasPrincipalKey("BrokerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -381,6 +426,11 @@ namespace HouseBrokerApp.Infrastructure.Migrations
             modelBuilder.Entity("HouseBrokerApp.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Listings");
+                });
+
+            modelBuilder.Entity("HouseBrokerApp.Domain.Entities.PropertyListing", b =>
+                {
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

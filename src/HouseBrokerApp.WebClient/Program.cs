@@ -1,4 +1,4 @@
-using HouseBrokerApp.WebClient;
+﻿using HouseBrokerApp.WebClient;
 using HouseBrokerApp.WebClient.Authentication;
 using HouseBrokerApp.WebClient.Services;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -13,7 +13,13 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7201/")
+});
+
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddHttpClient();
+
 await builder.Build().RunAsync();

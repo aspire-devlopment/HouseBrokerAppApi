@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using HouseBrokerApp.Infrastructure;
+using HouseBrokerApp.Infrastructure.Persistence;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -16,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddApplicationServices();  // from Application project
+
 
 builder.Services.AddInfrastructureServices(builder.Configuration);  // from Infrastructure project
 builder.Services.AddMemoryCache();
@@ -28,6 +29,13 @@ builder.Services.AddControllers()
         config.RegisterValidatorsFromAssemblyContaining<RegisterRequestValidator>();
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NewPolicy", builder =>
+    builder.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()                        // adjust as needed
@@ -77,10 +85,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddHttpClient("ApiClient", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7201/api/"); // Adjust your API URL
-});
+
 
 var app = builder.Build();
 
@@ -89,12 +94,22 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     await HouseBrokerApp.Infrastructure.Seed.DataSeeder.SeedRolesAndAdminAsync(services);
 }
+//seed comission
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await HouseBrokerApp.Infrastructure.Seed.DataSeeder.SeedCommissionRatesAsync(services);
+
+}
 //seed Roles
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await HouseBrokerApp.Infrastructure.Seed.DataSeeder.SeedRolesAsync(services);
 }
+
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -108,9 +123,15 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<LoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseCors("NewPolicy"); 
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

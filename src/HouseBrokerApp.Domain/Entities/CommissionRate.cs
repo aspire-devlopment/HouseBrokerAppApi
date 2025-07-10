@@ -11,6 +11,6 @@ public class CommissionRate : BaseEntity
 {
     public decimal? MinPrice { get; set; }  // Optional: null for "no lower limit"
     public decimal? MaxPrice { get; set; }  // Optional: null for "no upper limit"
-    public decimal Rate { get; set; }       // e.g., 0.02 for 2%
+    public decimal? Rate { get; set; }       // e.g., 0.02 for 2%
    
 }

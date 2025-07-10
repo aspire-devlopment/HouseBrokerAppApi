@@ -1,10 +1,7 @@
 ﻿using HouseBrokerApp.Application.Interfaces;
 using HouseBrokerApp.Contracts.Requests;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace HouseBrokerApp.API.Controllers
 {

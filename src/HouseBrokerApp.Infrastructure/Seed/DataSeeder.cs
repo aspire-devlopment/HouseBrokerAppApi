@@ -1,4 +1,5 @@
 ﻿using HouseBrokerApp.Domain.Entities;
+using HouseBrokerApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,47 @@ public static class DataSeeder
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
+        }
+    }
+    public static async Task SeedCommissionRatesAsync(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<HouseBrokerAppDbContext>();
+
+        if (!dbContext.CommissionRates.Any())
+        {
+            var now = DateTime.UtcNow;
+
+            var commissionRates = new List<CommissionRate>
+            {
+                new CommissionRate
+                {
+                    MinPrice = 0,
+                    MaxPrice = 4999999,
+                    Rate = 0.02m,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                },
+                new CommissionRate
+                {
+                    MinPrice = 5000000,
+                    MaxPrice = 10000000,
+                    Rate = 0.0175m,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                },
+                new CommissionRate
+                {
+                    MinPrice = 10000001,
+                    MaxPrice = null,
+                    Rate = 0.015m,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                }
+            };
+
+            dbContext.CommissionRates.AddRange(commissionRates);
+            await dbContext.SaveChangesAsync();
         }
     }
 

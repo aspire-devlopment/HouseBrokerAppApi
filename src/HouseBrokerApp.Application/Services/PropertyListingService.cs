@@ -70,7 +70,7 @@ public class PropertyListingService : IPropertyListingService
             var brokerData = await _userRepository.FindAsync(x => x.BrokerId == response.BrokerId);
 
             var brokerDetail = brokerData.FirstOrDefault();
-
+           
             response.BrokerFirstName = brokerDetail.FirstName;       
             response.BrokerLastName = brokerDetail.LastName;
             response.BrokerPhoneNumber = brokerDetail.PhoneNumber;

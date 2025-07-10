@@ -6,17 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HouseBrokerApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentityTables : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "ApplicationUserId",
-                table: "PropertyListings",
-                type: "nvarchar(450)",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -36,6 +30,8 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BrokerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -59,6 +55,24 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.UniqueConstraint("AK_AspNetUsers_BrokerId", x => x.BrokerId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommissionRates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MinPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    MaxPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Rate = table.Column<decimal>(type: "decimal(5,4)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommissionRates", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,10 +181,55 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PropertyListings_ApplicationUserId",
-                table: "PropertyListings",
-                column: "ApplicationUserId");
+            migrationBuilder.CreateTable(
+                name: "PropertyListings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PropertyType = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Features = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BrokerId = table.Column<int>(type: "int", nullable: false),
+                    CommissionAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyListings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PropertyListings_AspNetUsers_BrokerId",
+                        column: x => x.BrokerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "BrokerId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PropertyImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PropertyListingId = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PropertyImages_PropertyListings_PropertyListingId",
+                        column: x => x.PropertyListingId,
+                        principalTable: "PropertyListings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -205,27 +264,32 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_BrokerId",
+                table: "AspNetUsers",
+                column: "BrokerId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_PropertyListings_AspNetUsers_ApplicationUserId",
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyImages_PropertyListingId",
+                table: "PropertyImages",
+                column: "PropertyListingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyListings_BrokerId",
                 table: "PropertyListings",
-                column: "ApplicationUserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id");
+                column: "BrokerId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_PropertyListings_AspNetUsers_ApplicationUserId",
-                table: "PropertyListings");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -242,18 +306,19 @@ namespace HouseBrokerApp.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CommissionRates");
+
+            migrationBuilder.DropTable(
+                name: "PropertyImages");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "PropertyListings");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropIndex(
-                name: "IX_PropertyListings_ApplicationUserId",
-                table: "PropertyListings");
-
-            migrationBuilder.DropColumn(
-                name: "ApplicationUserId",
-                table: "PropertyListings");
         }
     }
 }
